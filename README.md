@@ -9,7 +9,7 @@
 
 ## Project Management Tools
 
- *Jira*
+ *Atlassian Jira*
  - https://luisgvazquez.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog
 
 
