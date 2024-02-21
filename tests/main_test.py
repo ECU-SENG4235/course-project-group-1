@@ -4,6 +4,18 @@ from main import download_video, download_audio
 
 class TestDownload(unittest.TestCase):
 
+    def setUp(self):
+        # Create necessary directories for testing
+        os.makedirs("video_downloads", exist_ok=True)
+        os.makedirs("audio_downloads", exist_ok=True)
+
+    def tearDown(self):
+        # Remove downloaded files after each test
+        for file in os.listdir("video_downloads"):
+            os.remove(os.path.join("video_downloads", file))
+        for file in os.listdir("audio_downloads"):
+            os.remove(os.path.join("audio_downloads", file))
+
     def test_download_video(self):
         # Test successful video download
         video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship" 

@@ -2,8 +2,6 @@ import os
 from pytube import YouTube
 from pytube.cli import on_progress
 
-import os
-
 def download_video(video_url):
     yt = YouTube(video_url, on_progress_callback=on_progress)
     stream = yt.streams.get_highest_resolution()
@@ -34,22 +32,28 @@ def download_audio(video_url, quality='high'):
         print(f"Downloaded and converted audio to MP3: {audio_file_mp3}")
 
 def main():
-    # Prompt user for YouTube video URL
-    video_url = input("Enter the YouTube video URL: ")
-    
-    # Prompt user to choose between audio and video download
-    choice = input("Download as Audio or Video (A/V)?: ").lower()
-    
-    if choice == 'a':  # If user chooses to download audio
-        # Prompt user to select audio quality
-        quality = input("Select audio quality (High/Low): ").lower()
-        # Call download_audio function with specified quality
-        download_audio(video_url, quality)
-    elif choice == 'v':  # If user chooses to download video
-        # Call download_video function
-        download_video(video_url)
-    else:
-        print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
+    while True:  # Loop indefinitely until the user decides to quit
+        # Prompt user for YouTube video URL
+        video_url = input("Enter the YouTube video URL: ")
+        
+        # Prompt user to choose between audio and video download
+        choice = input("Download as Audio or Video (A/V)?: ").lower()
+        
+        if choice == 'a':  # If user chooses to download audio
+            # Prompt user to select audio quality
+            quality = input("Select audio quality (High/Low): ").lower()
+            # Call download_audio function with specified quality
+            download_audio(video_url, quality)
+        elif choice == 'v':  # If user chooses to download video
+            # Call download_video function
+            download_video(video_url)
+        else:
+            print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
+        
+        # Ask the user if they want to download another file
+        another_download = input("Do you want to download another file? (yes/no): ").lower()
+        if another_download != 'yes':
+            break  # If the user does not want to download another file, exit the loop
 
 # Entry point of the program
 if __name__ == "__main__":
