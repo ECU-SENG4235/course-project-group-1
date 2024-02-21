@@ -45,4 +45,24 @@ flowchart TD;
     M --> N
 ```
 
-## Install/Run Instructions
+## Instructions (will be updated as project evolves)
+
+*Install Instructions:*
+- Install python
+- Install pip3
+- Create virtual environment
+- Activate virtual environment
+- Install requirements.txt file
+- Run main python file
+
+*Use Instructions:*
+- When it asks for link provide url for youtube video
+- When it asks for audio or video: Type a or v
+  - If A is selected, select quality and type in High or Low, video will be converted and downloaded as an mp3 audio file
+  - If V is selected video will be downloaded as an mp4 video file
+- When it asks you if you want to download another video
+  - If you select yes, the process will start again
+  - If you say no the program will exit
+
+
+
