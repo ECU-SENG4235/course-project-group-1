@@ -62,7 +62,7 @@ flowchart TD;
   - If V is selected video will be downloaded as an mp4 video file
 - When it asks you if you want to download another video
   - If you select yes, the process will start again
-  - If you say no the program will exit
+  - If you salect no the program will exit
 
 
 
