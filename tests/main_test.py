@@ -1,6 +1,7 @@
 import unittest
 import os
-from main import download_video, download_audio
+from main import download_video, download_audio, main
+from unittest.mock import patch, call
 
 class TestDownload(unittest.TestCase):
 
@@ -42,6 +43,31 @@ class TestDownload(unittest.TestCase):
         # Check if audio file exists and has a non-zero size
         self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")))
         self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")) > 0)
+        
+        
+    def test_invalid_video_url(self):
+        # Test download with invalid video URL
+        invalid_video_url = "https://www.youtube.com/watch_invalid_url"
+        with self.assertRaises(Exception):  # Assuming an appropriate exception is raised
+            download_video(invalid_video_url)
+       
+    def test_invalid_audio_quality(self):
+        # Test download with invalid audio quality choice
+        video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
+        invalid_quality = 'invalid_quality'
+        download_audio(video_url, invalid_quality)
+        # Check if audio file exists and has a non-zero size with high quality tag
+        self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"SQL Explained in 100 Seconds_high_q.mp3")))
+        self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"SQL Explained in 100 Seconds_high_q.mp3")) > 0)
+
+    @patch('builtins.input', side_effect=['https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship', 'V', 'no'])
+    def test_invalid_user_choice(self, mock_input):
+        # Test invalid user choice in main program
+        main()  # Run the main program
+        # Check if invalid choice prompt is displayed and then user is prompted again for a valid choice
+        self.assertEqual(mock_input.call_args_list, [call("Enter the YouTube video URL: "),
+                                                    call("Download as Audio or Video (A/V)?: "),
+                                                    call("Do you want to download another file? (yes/no): ")])
 
 if __name__ == '__main__':
     unittest.main()

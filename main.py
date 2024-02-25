@@ -1,6 +1,7 @@
 import os
 from pytube import YouTube
 from pytube.cli import on_progress
+from pytube.exceptions import RegexMatchError
 
 def download_video(video_url):
     yt = YouTube(video_url, on_progress_callback=on_progress)
@@ -36,6 +37,13 @@ def main():
         # Prompt user for YouTube video URL
         video_url = input("Enter the YouTube video URL: ")
         
+        try:
+            # Check if the URL is valid
+            YouTube(video_url)
+        except RegexMatchError:
+            print("Invalid YouTube video URL. Please enter a valid URL.")
+            continue  # Prompt the user again for a valid URL
+
         # Prompt user to choose between audio and video download
         choice = input("Download as Audio or Video (A/V)?: ").lower()
         
@@ -54,6 +62,7 @@ def main():
         another_download = input("Do you want to download another file? (yes/no): ").lower()
         if another_download != 'yes':
             break  # If the user does not want to download another file, exit the loop
+
 
 # Entry point of the program
 if __name__ == "__main__":
