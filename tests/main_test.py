@@ -1,47 +1,55 @@
 import unittest
 import os
+import shutil
+from unittest.mock import patch
 from main import download_video, download_audio
 
 class TestDownload(unittest.TestCase):
 
     def setUp(self):
-        # Create necessary directories for testing
-        os.makedirs("video_downloads", exist_ok=True)
-        os.makedirs("audio_downloads", exist_ok=True)
+        # Create a temporary directory for testing
+        self.temp_dir = os.path.join(os.getcwd(), "temp_test_files")
+        os.makedirs(self.temp_dir, exist_ok=True)
 
     def tearDown(self):
-        # Remove downloaded files after each test
-        for file in os.listdir("video_downloads"):
-            os.remove(os.path.join("video_downloads", file))
-        for file in os.listdir("audio_downloads"):
-            os.remove(os.path.join("audio_downloads", file))
+        # Remove the temporary directory and its contents
+        shutil.rmtree(self.temp_dir)
 
-    def test_download_video(self):
+    @patch("main.messagebox.askyesno", return_value=True)  # Mock askyesno to always return True
+    @patch("main.entry.get", return_value="https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship")  # Mock entry.get to return a URL
+    def test_download_video(self, mock_entry_get, mock_askyesno):
         # Test successful video download
-        video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship" 
-        video_id = "SQL Explained in 100 Seconds"  # Assuming download_video saves the video file with the video_id as name
-        download_video(video_url)
+        download_video("https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship")
         # Check if video file exists and has a non-zero size
-        self.assertTrue(os.path.exists(os.path.join("video_downloads", f"{video_id}.mp4")))
-        self.assertTrue(os.path.getsize(os.path.join("video_downloads", f"{video_id}.mp4")) > 0)
+        video_files = [f for f in os.listdir("video_downloads") if f.endswith(".mp4")]
+        self.assertTrue(len(video_files) == 1)
+        video_file_path = os.path.join("video_downloads", video_files[0])
+        self.assertTrue(os.path.exists(video_file_path))
+        self.assertTrue(os.path.getsize(video_file_path) > 0)
 
-    def test_download_audio_high_quality(self):
+    @patch("main.messagebox.askyesno", return_value=True)  # Mock askyesno to always return True
+    @patch("main.entry.get", return_value="https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship")  # Mock entry.get to return a URL
+    def test_download_audio_high_quality(self, mock_entry_get, mock_askyesno):
         # Test successful high quality audio download
-        video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
-        audio_id = "SQL Explained in 100 Seconds"  # Assuming download_audio saves the audio file with the audio_id as name
-        download_audio(video_url, 'high')
+        download_audio("https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship")
         # Check if audio file exists and has a non-zero size
-        self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"{audio_id}_high_q.mp3")))
-        self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"{audio_id}_high_q.mp3")) > 0)
+        audio_files = [f for f in os.listdir("audio_downloads") if f.endswith("_high_q.mp3")]
+        self.assertTrue(len(audio_files) == 1)
+        audio_file_path = os.path.join("audio_downloads", audio_files[0])
+        self.assertTrue(os.path.exists(audio_file_path))
+        self.assertTrue(os.path.getsize(audio_file_path) > 0)
 
-    def test_download_audio_low_quality(self):
+    @patch("main.messagebox.askyesno", return_value=True)  # Mock askyesno to always return True
+    @patch("main.entry.get", return_value="https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship")  # Mock entry.get to return a URL
+    def test_download_audio_low_quality(self, mock_entry_get, mock_askyesno):
         # Test successful low quality audio download
-        video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
-        audio_id = "SQL Explained in 100 Seconds"  # Assuming download_audio saves the audio file with the audio_id as name
-        download_audio(video_url, 'low')
+        download_audio("https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship", quality='low')
         # Check if audio file exists and has a non-zero size
-        self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")))
-        self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")) > 0)
+        audio_files = [f for f in os.listdir("audio_downloads") if f.endswith("_low_q.mp3")]
+        self.assertTrue(len(audio_files) == 1)
+        audio_file_path = os.path.join("audio_downloads", audio_files[0])
+        self.assertTrue(os.path.exists(audio_file_path))
+        self.assertTrue(os.path.getsize(audio_file_path) > 0)
 
 if __name__ == '__main__':
     unittest.main()
