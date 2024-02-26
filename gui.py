@@ -11,7 +11,7 @@ def download():
     elif choice == 'V':
         download_video(video_url)
     else:
-        messagebox.showerror("Error", "Invalid choice. Please select either Audio or Videx  o.")
+        messagebox.showerror("Error", "Invalid choice. Please select either Audio or Video.")
 
 # Initialize the main window
 root = tk.Tk()
