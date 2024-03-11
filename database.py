@@ -23,3 +23,12 @@ def insert_video_metadata(db_file, video_metadata):
                  VALUES (?, ?, ?, ?, ?)''', video_metadata)
     conn.commit()
     conn.close()
+
+# Function to fetch all video metadata from the database
+def fetch_all_videos(db_file):
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+    c.execute("SELECT * FROM videos")
+    rows = c.fetchall()
+    conn.close()
+    return rows
