@@ -4,7 +4,7 @@ import tempfile
 import os
 
 # Import functions from the file to be tested
-from database import create_database, insert_video_metadata, fetch_all_videos
+from database import create_database, insert_video_metadata, insert_audio_metadata, fetch_all_videos, fetch_all_audio
 
 class TestDatabaseFunctions(unittest.TestCase):
     def setUp(self):
@@ -26,7 +26,12 @@ class TestDatabaseFunctions(unittest.TestCase):
         result = c.fetchone()
         self.assertIsNotNone(result)
 
-    def test_insert_and_fetch(self):
+        # Check if the audio_metadata table exists
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='audio_metadata'")
+        result = c.fetchone()
+        self.assertIsNotNone(result)
+
+    def test_insert_and_fetch_videos(self):
         # Insert test data
         video_metadata = ('http://example.com/video1', 'Video 1', 'Author 1', 120, '1080p')
         insert_video_metadata(self.db_path, video_metadata)
@@ -41,6 +46,23 @@ class TestDatabaseFunctions(unittest.TestCase):
         self.assertEqual(videos[0][3], 'Author 1')
         self.assertEqual(videos[0][4], 120)
         self.assertEqual(videos[0][5], '1080p')
+
+    def test_insert_and_fetch_audio(self):
+        # Insert test data
+        audio_metadata = ('http://example.com/audio1', 'Audio 1', 'Author 1', 120, 'high', 128)
+        insert_audio_metadata(self.db_path, audio_metadata)
+
+        # Fetch the inserted data
+        audio = fetch_all_audio(self.db_path)
+
+        # Check if the fetched data matches the inserted data
+        self.assertEqual(len(audio), 1)
+        self.assertEqual(audio[0][1], 'http://example.com/audio1')
+        self.assertEqual(audio[0][2], 'Audio 1')
+        self.assertEqual(audio[0][3], 'Author 1')
+        self.assertEqual(audio[0][4], 120)
+        self.assertEqual(audio[0][5], 'high')
+        self.assertEqual(audio[0][6], 128)
 
 if __name__ == '__main__':
     unittest.main()

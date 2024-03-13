@@ -29,8 +29,8 @@ class TestDownload(unittest.TestCase):
         # Assert that insert_video_metadata was called
         mock_insert_video_metadata.assert_called_once()
 
-    @patch('main.insert_video_metadata')
-    def test_download_audio_high_quality(self, mock_insert_video_metadata):
+    @patch('main.insert_audio_metadata')
+    def test_download_audio_high_quality(self, mock_insert_audio_metadata):
         # Test successful high quality audio download
         video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
         audio_id = "SQL Explained in 100 Seconds"  # Assuming download_audio saves the audio file with the audio_id as name
@@ -38,11 +38,11 @@ class TestDownload(unittest.TestCase):
         # Check if audio file exists and has a non-zero size
         self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"{audio_id}_high_q.mp3")))
         self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"{audio_id}_high_q.mp3")) > 0)
-        # Assert that insert_video_metadata was called
-        mock_insert_video_metadata.assert_called_once()
+        # Assert that insert_audio_metadata was called
+        mock_insert_audio_metadata.assert_called_once()
 
-    @patch('main.insert_video_metadata')
-    def test_download_audio_low_quality(self, mock_insert_video_metadata):
+    @patch('main.insert_audio_metadata')
+    def test_download_audio_low_quality(self, mock_insert_audio_metadata):
         # Test successful low quality audio download
         video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
         audio_id = "SQL Explained in 100 Seconds"  # Assuming download_audio saves the audio file with the audio_id as name
@@ -50,8 +50,8 @@ class TestDownload(unittest.TestCase):
         # Check if audio file exists and has a non-zero size
         self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")))
         self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")) > 0)
-        # Assert that insert_video_metadata was called
-        mock_insert_video_metadata.assert_called_once()
+        # Assert that insert_audio_metadata was called
+        mock_insert_audio_metadata.assert_called_once()
 
     @patch('main.insert_video_metadata')
     def test_invalid_video_url(self, mock_insert_video_metadata):
@@ -62,8 +62,8 @@ class TestDownload(unittest.TestCase):
         # Assert that insert_video_metadata was not called
         mock_insert_video_metadata.assert_not_called()
 
-    @patch('main.insert_video_metadata')
-    def test_invalid_audio_quality(self, mock_insert_video_metadata):
+    @patch('main.insert_audio_metadata')
+    def test_invalid_audio_quality(self, mock_insert_audio_metadata):
         # Test download with invalid audio quality choice
         video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
         invalid_quality = 'invalid_quality'
@@ -71,8 +71,8 @@ class TestDownload(unittest.TestCase):
         # Check if audio file exists and has a non-zero size with high quality tag
         self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"SQL Explained in 100 Seconds_high_q.mp3")))
         self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"SQL Explained in 100 Seconds_high_q.mp3")) > 0)
-        # Assert that insert_video_metadata was called
-        mock_insert_video_metadata.assert_called_once()
+        # Assert that insert_audio_metadata was called
+        mock_insert_audio_metadata.assert_called_once()
 
     @patch('main.insert_video_metadata')
     @patch('builtins.input', side_effect=['https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship', 'V', 'no'])
