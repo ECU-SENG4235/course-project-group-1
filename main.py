@@ -2,7 +2,7 @@ import os
 from pytube import YouTube
 from pytube.cli import on_progress
 from pytube.exceptions import RegexMatchError
-from database import create_database, insert_video_metadata
+from database import create_database, insert_video_metadata, insert_audio_metadata
 
 # Function to download video
 def download_video(video_url):
@@ -16,14 +16,14 @@ def download_video(video_url):
     insert_video_metadata("video_metadata.db", video_metadata)
     print("Video metadata saved to the database.")
 
-# Function to download audio
 def download_audio(video_url, quality='high'):
     yt = YouTube(video_url, on_progress_callback=on_progress)
+
     if quality == 'high':
-        stream = yt.streams.filter(only_audio=True).first()
+        stream = yt.streams.filter(only_audio=True, abr='128kbps').first()
         quality_tag = 'high_q'
     elif quality == 'low':
-        stream = yt.streams.filter(only_audio=True, abr='128kbps').first()
+        stream = yt.streams.filter(only_audio=True).first()
         quality_tag = 'low_q'
     else:
         print("Invalid audio quality choice. Downloading in high quality.")
@@ -35,14 +35,17 @@ def download_audio(video_url, quality='high'):
 
     if os.path.exists(audio_file_mp3):
         print(f"MP3 file already exists: {audio_file_mp3}")
+        os.remove(audio_file)  # Remove the duplicate audio file
     else:
         os.rename(audio_file, audio_file_mp3)
         print(f"Downloaded and converted audio to MP3: {audio_file_mp3}")
 
-    # Insert video metadata into the database
-    video_metadata = (video_url, yt.title, yt.author, yt.length, 'Audio')
-    insert_video_metadata("video_metadata.db", video_metadata)
+    # Insert audio metadata into the database
+    audio_metadata = (video_url, yt.title, yt.author, yt.length, quality, stream.abr)
+    insert_audio_metadata("video_metadata.db", audio_metadata)
+
     print("Audio metadata saved to the database.")
+
 
 def main():
     # Create the database if it doesn't exist
