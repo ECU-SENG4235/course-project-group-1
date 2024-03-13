@@ -9,49 +9,46 @@ class TestDownload(unittest.TestCase):
         # Create necessary directories for testing
         os.makedirs("video_downloads", exist_ok=True)
         os.makedirs("audio_downloads", exist_ok=True)
+        self.downloaded_files = set()  # Keep track of downloaded files
 
     def tearDown(self):
         # Remove downloaded files after each test
-        for file in os.listdir("video_downloads"):
-            os.remove(os.path.join("video_downloads", file))
-        for file in os.listdir("audio_downloads"):
-            os.remove(os.path.join("audio_downloads", file))
+        for file in self.downloaded_files:
+            os.remove(file)
+        self.downloaded_files.clear()
 
     @patch('main.insert_video_metadata')
     def test_download_video(self, mock_insert_video_metadata):
-        # Test successful video download
         video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship" 
-        video_id = "SQL Explained in 100 Seconds"  # Assuming download_video saves the video file with the video_id as name
+        video_id = "SQL Explained in 100 Seconds"
         download_video(video_url)
-        # Check if video file exists and has a non-zero size
-        self.assertTrue(os.path.exists(os.path.join("video_downloads", f"{video_id}.mp4")))
-        self.assertTrue(os.path.getsize(os.path.join("video_downloads", f"{video_id}.mp4")) > 0)
-        # Assert that insert_video_metadata was called
+        video_file_path = os.path.join("video_downloads", f"{video_id}.mp4")
+        self.assertTrue(os.path.exists(video_file_path))
+        self.assertTrue(os.path.getsize(video_file_path) > 0)
         mock_insert_video_metadata.assert_called_once()
+        self.downloaded_files.add(video_file_path)  # Add downloaded file to the set
 
     @patch('main.insert_audio_metadata')
     def test_download_audio_high_quality(self, mock_insert_audio_metadata):
-        # Test successful high quality audio download
         video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
-        audio_id = "SQL Explained in 100 Seconds"  # Assuming download_audio saves the audio file with the audio_id as name
+        audio_id = "SQL Explained in 100 Seconds"
         download_audio(video_url, 'high')
-        # Check if audio file exists and has a non-zero size
-        self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"{audio_id}_high_q.mp3")))
-        self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"{audio_id}_high_q.mp3")) > 0)
-        # Assert that insert_audio_metadata was called
+        audio_file_path = os.path.join("audio_downloads", f"{audio_id}_high_q.mp3")
+        self.assertTrue(os.path.exists(audio_file_path))
+        self.assertTrue(os.path.getsize(audio_file_path) > 0)
         mock_insert_audio_metadata.assert_called_once()
+        self.downloaded_files.add(audio_file_path)  # Add downloaded file to the set
 
     @patch('main.insert_audio_metadata')
     def test_download_audio_low_quality(self, mock_insert_audio_metadata):
-        # Test successful low quality audio download
         video_url = "https://www.youtube.com/watch?v=zsjvFFKOm3c&ab_channel=Fireship"
-        audio_id = "SQL Explained in 100 Seconds"  # Assuming download_audio saves the audio file with the audio_id as name
+        audio_id = "SQL Explained in 100 Seconds"
         download_audio(video_url, 'low')
-        # Check if audio file exists and has a non-zero size
-        self.assertTrue(os.path.exists(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")))
-        self.assertTrue(os.path.getsize(os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")) > 0)
-        # Assert that insert_audio_metadata was called
+        audio_file_path = os.path.join("audio_downloads", f"{audio_id}_low_q.mp3")
+        self.assertTrue(os.path.exists(audio_file_path))
+        self.assertTrue(os.path.getsize(audio_file_path) > 0)
         mock_insert_audio_metadata.assert_called_once()
+        self.downloaded_files.add(audio_file_path)  # Add downloaded file to the set
 
     @patch('main.insert_video_metadata')
     def test_invalid_video_url(self, mock_insert_video_metadata):
