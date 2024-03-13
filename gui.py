@@ -17,73 +17,49 @@ def download():
 def view_downloads():
     display_sections()  # Call the function to display sections
 
+def toggle_quality_options():
+    if choice_var.get() == 'A':
+        high_quality_button.pack()
+        low_quality_button.pack()
+    else:
+        high_quality_button.pack_forget()
+        low_quality_button.pack_forget()
+
 # Initialize the main window
 root = tk.Tk()
 root.title("Link2Playback")
-
-#rounded edges
-def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
-    points = [x1 + radius, y1,
-              x1 + radius, y1,
-              x2 - radius, y1,
-              x2 - radius, y1,
-              x2, y1,
-              x2, y1 + radius,
-              x2, y1 + radius,
-              x2, y2 - radius,
-              x2, y2 - radius,
-              x2, y2,
-              x2 - radius, y2,
-              x2 - radius, y2,
-              x1 + radius, y2,
-              x1 + radius, y2,
-              x1, y2,
-              x1, y2 - radius,
-              x1, y2 - radius,
-              x1, y1 + radius,
-              x1, y1 + radius,
-              x1, y1]
-
-    return canvas.create_polygon(points, **kwargs, smooth=True)
-
-
 
 # Set initial window size
 root.geometry("736x414")
 
 # URL entry
 url_label = tk.Label(root, text="YouTube URL:")
-url_label.pack()
+url_label.pack(pady=(10, 0))  # Added padding on the y-axis, more space at the top
 url_entry = tk.Entry(root)
-url_entry.pack()
+url_entry.pack(pady=(0, 10))  # Added padding on the y-axis, more space at the bottom
 
 # Radio buttons for choice
 choice_var = tk.StringVar()
-video_button = tk.Radiobutton(root, text="Video", variable=choice_var, value='V')
-audio_button = tk.Radiobutton(root, text="Audio", variable=choice_var, value='A')
+video_button = tk.Radiobutton(root, text="Video", variable=choice_var, value='V', command=toggle_quality_options)
+audio_button = tk.Radiobutton(root, text="Audio", variable=choice_var, value='A', command=toggle_quality_options)
 
-audio_button.pack()
-video_button.pack()
+audio_button.pack(pady=5)  # Added padding between the buttons
+video_button.pack(pady=5)  # Added padding between the buttons
 
 # Radio buttons for quality
 quality_var = tk.StringVar(value='high')
 high_quality_button = tk.Radiobutton(root, text="High Quality", variable=quality_var, value='high')
 low_quality_button = tk.Radiobutton(root, text="Low Quality", variable=quality_var, value='low')
-high_quality_button.pack()
-low_quality_button.pack()
 
 # Download button
 download_button = tk.Button(root, text="Download", command=download)
-download_button.pack()
-
-# Close button with round edges (example styling, adjust as needed)
-#close_button = tk.Button(root, text="X", command=root.destroy)
-#close_button.pack()
 
 # Button to view downloads
 view_downloads_button = tk.Button(root, text="View Downloads", command=view_downloads)
-view_downloads_button.pack()
 
+# Pack buttons to bottom
+download_button.pack(side="bottom", pady=(5, 10))  # Added padding at the top and bottom
+view_downloads_button.pack(side="bottom", pady=(5, 10))  # Added padding at the top and bottom
 
 # Run the application
 root.mainloop()
