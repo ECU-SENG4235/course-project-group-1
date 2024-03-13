@@ -17,30 +17,34 @@ def display_sections():
     videos = [video for video in all_videos if video[5] != "Audio"]
     audio = fetch_all_audio("video_metadata.db")
 
-    print("Structure of audio tuple:")
-    print(audio)
-
-
     root = tk.Tk()
-    root.title("Sections")
+    root.title("Downloads")
+
+    root.geometry("736x414")
 
     video_frame = tk.Frame(root)
-    video_frame.pack(side=tk.LEFT, padx=10, pady=10)
+    video_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
     video_label = tk.Label(video_frame, text="Videos")
     video_label.pack()
     video_listbox = tk.Listbox(video_frame)
     for video in videos:
         video_listbox.insert(tk.END, video[2])
-    video_listbox.pack()
+    video_listbox.pack(fill=tk.BOTH, expand=True)  
+    video_scrollbar = tk.Scrollbar(video_frame, orient=tk.VERTICAL, command=video_listbox.yview)
+    video_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    video_listbox.config(yscrollcommand=video_scrollbar.set)
 
     audio_frame = tk.Frame(root)
-    audio_frame.pack(side=tk.RIGHT, padx=10, pady=10)
+    audio_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
     audio_label = tk.Label(audio_frame, text="Audio")
     audio_label.pack()
     audio_listbox = tk.Listbox(audio_frame)
     for audio_item in audio:
-        audio_listbox.insert(tk.END, audio_item[2])  # Fetch audio_url from the second tuple element
-    audio_listbox.pack()
+        audio_listbox.insert(tk.END, audio_item[2])
+    audio_listbox.pack(fill=tk.BOTH, expand=True)
+    audio_scrollbar = tk.Scrollbar(audio_frame, orient=tk.VERTICAL, command=audio_listbox.yview)
+    audio_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    audio_listbox.config(yscrollcommand=audio_scrollbar.set)
 
     def on_select_video(event):
         if video_listbox.curselection():
@@ -48,7 +52,6 @@ def display_sections():
             selected_video = videos[index]
             video_metadata = {
                 "URL": selected_video[1],
-                "Title": selected_video[2],
                 "Author": selected_video[3],
                 "Duration": selected_video[4],
                 "Resolution": selected_video[5]
@@ -60,9 +63,7 @@ def display_sections():
             index = audio_listbox.curselection()[0]
             selected_audio = audio[index]
             audio_metadata = {
-                "ID": selected_audio[0],
                 "URL": selected_audio[1],
-                "Title": selected_audio[2],
                 "Author": selected_audio[3],
                 "Duration": selected_audio[4],
                 "Quality": selected_audio[5],
