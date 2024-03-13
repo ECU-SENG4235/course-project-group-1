@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from main import download_video, download_audio
+from view_downloads import display_sections
 
 def download():
     video_url = url_entry.get()
@@ -12,6 +13,9 @@ def download():
         download_video(video_url)
     else:
         messagebox.showerror("Error", "Invalid choice. Please select either Audio or Video.")
+
+def view_downloads():
+    display_sections()  # Call the function to display sections
 
 # Initialize the main window
 root = tk.Tk()
@@ -41,6 +45,8 @@ def create_rounded_rectangle(canvas, x1, y1, x2, y2, radius, **kwargs):
               x1, y1]
 
     return canvas.create_polygon(points, **kwargs, smooth=True)
+
+
 
 # Set initial window size
 root.geometry("736x414")
@@ -73,6 +79,11 @@ download_button.pack()
 # Close button with round edges (example styling, adjust as needed)
 #close_button = tk.Button(root, text="X", command=root.destroy)
 #close_button.pack()
+
+# Button to view downloads
+view_downloads_button = tk.Button(root, text="View Downloads", command=view_downloads)
+view_downloads_button.pack()
+
 
 # Run the application
 root.mainloop()

@@ -1,0 +1,85 @@
+import tkinter as tk
+from database import fetch_all_videos, fetch_all_audio
+
+def display_details(title, metadata):
+    popup = tk.Toplevel()
+    popup.title("Details")
+    details_label = tk.Label(popup, text=title)
+    details_label.pack()
+
+    for key, value in metadata.items():
+        detail_text = f"{key}: {value}"
+        detail_label = tk.Label(popup, text=detail_text)
+        detail_label.pack()
+
+def display_sections():
+    all_videos = fetch_all_videos("video_metadata.db")
+    videos = [video for video in all_videos if video[5] != "Audio"]
+    audio = fetch_all_audio("video_metadata.db")
+
+    print("Structure of audio tuple:")
+    print(audio)
+
+
+    root = tk.Tk()
+    root.title("Sections")
+
+    video_frame = tk.Frame(root)
+    video_frame.pack(side=tk.LEFT, padx=10, pady=10)
+    video_label = tk.Label(video_frame, text="Videos")
+    video_label.pack()
+    video_listbox = tk.Listbox(video_frame)
+    for video in videos:
+        video_listbox.insert(tk.END, video[2])
+    video_listbox.pack()
+
+    audio_frame = tk.Frame(root)
+    audio_frame.pack(side=tk.RIGHT, padx=10, pady=10)
+    audio_label = tk.Label(audio_frame, text="Audio")
+    audio_label.pack()
+    audio_listbox = tk.Listbox(audio_frame)
+    for audio_item in audio:
+        audio_listbox.insert(tk.END, audio_item[2])  # Fetch audio_url from the second tuple element
+    audio_listbox.pack()
+
+    def on_select_video(event):
+        if video_listbox.curselection():
+            index = video_listbox.curselection()[0]
+            selected_video = videos[index]
+            video_metadata = {
+                "URL": selected_video[1],
+                "Title": selected_video[2],
+                "Author": selected_video[3],
+                "Duration": selected_video[4],
+                "Resolution": selected_video[5]
+            }
+            display_details(selected_video[2], video_metadata)
+
+    def on_select_audio(event):
+        if audio_listbox.curselection():
+            index = audio_listbox.curselection()[0]
+            selected_audio = audio[index]
+            audio_metadata = {
+                "ID": selected_audio[0],
+                "URL": selected_audio[1],
+                "Title": selected_audio[2],
+                "Author": selected_audio[3],
+                "Duration": selected_audio[4],
+                "Quality": selected_audio[5],
+                "Bitrate": selected_audio[6]
+            }
+            display_details(selected_audio[2], audio_metadata)
+
+    video_listbox.bind("<<ListboxSelect>>", on_select_video)
+    audio_listbox.bind("<<ListboxSelect>>", on_select_audio)
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    display_sections()
+
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    display_sections()
