@@ -1,0 +1,2 @@
+IN LINE 8 OF gui.py plz make sure you change path for your machine
+Check for dependencies!
