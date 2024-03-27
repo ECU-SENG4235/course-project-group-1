@@ -9,3 +9,9 @@ _build
 .venv
 audio_downloads
 video_downloads
+video_metadata
+video_metadata.db
+audio_metadata.db
+Database videos.m3u
+link2playback.db
+.coverage
