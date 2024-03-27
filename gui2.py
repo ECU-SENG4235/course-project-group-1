@@ -14,7 +14,8 @@ def download():
     choice = choice_var.get()
     if choice == 'A':
         audio_format = audio_format_var.get()  # Get audio format if downloading audio
-        download_audio(video_url, audio_format)
+        audio_quality = quality_var.get()  # Get audio quality if downloading audio
+        download_audio(video_url, audio_format, audio_quality)  # Pass audio quality to the download_audio function
     elif choice == 'V':
         video_format = video_format_var.get()  # Get video format if downloading video
         download_video(video_url, video_format)

@@ -53,7 +53,7 @@ def display_sections():
             video_metadata = {
                 "URL": selected_video[1],
                 "Author": selected_video[3],
-                "Duration": selected_video[4],
+                "Duration (minutes)": selected_video[4]/60 ,
                 "Resolution": selected_video[5],
                 "Format": selected_video[6],
             }
@@ -66,10 +66,10 @@ def display_sections():
             audio_metadata = {
                 "URL": selected_audio[1],
                 "Author": selected_audio[3],
-                "Duration": selected_audio[4],
+                "Duration (minutes)": selected_audio[4]/60,
                 "Quality": selected_audio[5],
-                "Bitrate": selected_audio[6],
-                "Format": selected_audio[7],
+                "Bitrate": selected_audio[7],
+                "Format": selected_audio[6],
             }
             display_details(selected_audio[2], audio_metadata)
 
