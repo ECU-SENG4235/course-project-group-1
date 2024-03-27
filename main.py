@@ -4,14 +4,12 @@ from pytube.cli import on_progress
 from pytube.exceptions import RegexMatchError
 from database import create_database, insert_video_metadata, insert_audio_metadata
 
-# Function to download video
 def download_video(video_url):
     yt = YouTube(video_url, on_progress_callback=on_progress)
     stream = yt.streams.get_highest_resolution()
     stream.download(output_path="video_downloads")
     print(f"Downloaded video: {stream.title}")
 
-    # Insert video metadata into the database
     video_metadata = (video_url, stream.title, yt.author, yt.length, stream.resolution)
     insert_video_metadata("video_metadata.db", video_metadata)
     print("Video metadata saved to the database.")
@@ -35,25 +33,33 @@ def download_audio(video_url, quality='high'):
 
     if os.path.exists(audio_file_mp3):
         print(f"MP3 file already exists: {audio_file_mp3}")
-        os.remove(audio_file)  # Remove the duplicate audio file
+        os.remove(audio_file)
     else:
         os.rename(audio_file, audio_file_mp3)
         print(f"Downloaded and converted audio to MP3: {audio_file_mp3}")
 
-    # Insert audio metadata into the database
     audio_metadata = (video_url, yt.title, yt.author, yt.length, quality, stream.abr)
     insert_audio_metadata("video_metadata.db", audio_metadata)
 
     print("Audio metadata saved to the database.")
 
+def handle_gui_interaction(video_url, choice, quality='high'):
+    try:
+        if choice == 'a':
+            download_audio(video_url, quality)
+        elif choice == 'v':
+            download_video(video_url)
+        else:
+            print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
+    except RegexMatchError:
+        print("Invalid YouTube video URL. Please enter a valid URL.")
 
 def main():
-    # Create the database if it doesn't exist
     create_database("video_metadata.db")
 
     while True:
         video_url = input("Enter the YouTube video URL: ")
-        
+
         try:
             YouTube(video_url)
         except RegexMatchError:
@@ -61,15 +67,15 @@ def main():
             continue
 
         choice = input("Download as Audio or Video (A/V)?: ").lower()
-        
+
         if choice == 'a':
             quality = input("Select audio quality (High/Low): ").lower()
-            download_audio(video_url, quality)
+            handle_gui_interaction(video_url, choice, quality)
         elif choice == 'v':
-            download_video(video_url)
+            handle_gui_interaction(video_url, choice)
         else:
             print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
-        
+
         another_download = input("Do you want to download another file? (yes/no): ").lower()
         if another_download != 'yes':
             break

@@ -1,13 +1,14 @@
 import os
 import sys
+
+
+
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))  # Adding parent directory to sys path
-from main import handle_gui_interaction
 
-# Import guiPage2's tkinter code here
-from guiPage2.build.gui import open_guiPage2
+from main import handle_gui_interaction
 
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\kenda\Documents\CourseProject4235\course-project-group-1\guiPage1\build\assets\frame0") 
@@ -23,9 +24,6 @@ def quality_button_clicked():
     video_url = entry_2.get()
     quality = 'high'  # You can add functionality to select quality in the GUI
     handle_gui_interaction(video_url, 'a', quality)
-    
-    # Open guiPage2 when quality button is clicked
-    open_guiPage2()
 
 def download_button_clicked():
     video_url = entry_2.get()
