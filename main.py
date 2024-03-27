@@ -1,82 +1,105 @@
 import os
-from pytube import YouTube
+import time
+from pytube import YouTube, exceptions
 from pytube.cli import on_progress
-from pytube.exceptions import RegexMatchError
 from database import create_database, insert_video_metadata, insert_audio_metadata
+import ffmpeg
 
-def download_video(video_url):
+# Helper function to ensure download directories exist
+def ensure_directory_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+# Function to download video with specified resolution
+def download_video(video_url, resolution='720p'):
     yt = YouTube(video_url, on_progress_callback=on_progress)
-    stream = yt.streams.get_highest_resolution()
-    stream.download(output_path="video_downloads")
-    print(f"Downloaded video: {stream.title}")
+    
+    stream = yt.streams.filter(res=resolution, progressive=True).first()
+    
+    if not stream:
+        print(f"No stream found for resolution {resolution}. Attempting to download highest resolution available.")
+        stream = yt.streams.get_highest_resolution()
 
-    video_metadata = (video_url, stream.title, yt.author, yt.length, stream.resolution)
-    insert_video_metadata("video_metadata.db", video_metadata)
-    print("Video metadata saved to the database.")
+    if stream:
+        parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+        video_directory = os.path.join(parent_directory, "video_downloads")
+        ensure_directory_exists(video_directory)
+        
+        stream.download(output_path=video_directory)
+        print(f"Downloaded video: {stream.title}")
 
-def download_audio(video_url, quality='high'):
-    yt = YouTube(video_url, on_progress_callback=on_progress)
-
-    if quality == 'high':
-        stream = yt.streams.filter(only_audio=True, abr='128kbps').first()
-        quality_tag = 'high_q'
-    elif quality == 'low':
-        stream = yt.streams.filter(only_audio=True).first()
-        quality_tag = 'low_q'
+        video_metadata = (video_url, stream.title, yt.author, yt.length, stream.resolution)
+        insert_video_metadata("video_metadata.db", video_metadata)
+        print("Video metadata saved to the database.")
     else:
-        print("Invalid audio quality choice. Downloading in high quality.")
-        stream = yt.streams.filter(only_audio=True).first()
-        quality_tag = 'high_q'
+        print("Unable to download video. No suitable stream found.")
 
+# Function to download audio with specified quality and format
+def download_audio(video_url, channel='stereo', bit_depth='16-bit', format='mp3'):
+    yt = YouTube(video_url, on_progress_callback=on_progress)
+    audio_streams = yt.streams.filter(only_audio=True)
+    stream = audio_streams.first()
+    
+    ensure_directory_exists("audio_downloads")
     audio_file = stream.download(output_path="audio_downloads")
-    audio_file_mp3 = audio_file.replace(".mp4", f"_{quality_tag}.mp3")
+    base_audio_file = audio_file.replace(".mp4", "")
+    audio_file_formatted = f"{base_audio_file}_{channel}_{bit_depth}.{format}"
 
-    if os.path.exists(audio_file_mp3):
-        print(f"MP3 file already exists: {audio_file_mp3}")
-        os.remove(audio_file)
-    else:
-        os.rename(audio_file, audio_file_mp3)
-        print(f"Downloaded and converted audio to MP3: {audio_file_mp3}")
+    ffmpeg_params = {
+        'ac': 1 if channel == 'mono' else 2,
+        'acodec': 'pcm_s16le' if bit_depth == '16-bit' else 'pcm_s24le',
+        'ar': '44100'
+    }
+    if format == 'mp3':
+        ffmpeg_params['acodec'] = 'libmp3lame'
+    
+    ffmpeg.input(audio_file).output(audio_file_formatted, **ffmpeg_params).run(overwrite_output=True)
+    os.remove(audio_file)
+    print(f"Downloaded and converted audio: {audio_file_formatted}")
 
-    audio_metadata = (video_url, yt.title, yt.author, yt.length, quality, stream.abr)
+    audio_metadata = (video_url, yt.title, yt.author, yt.length, channel, bit_depth, format)
     insert_audio_metadata("video_metadata.db", audio_metadata)
-
     print("Audio metadata saved to the database.")
 
-def handle_gui_interaction(video_url, choice, quality='high'):
+# Function to handle GUI interaction, simplified for direct call from GUI buttons
+def handle_media_download(video_url, media_format, resolution='720p', channel='stereo', bit_depth='16-bit', format='mp3'):
     try:
-        if choice == 'a':
-            download_audio(video_url, quality)
-        elif choice == 'v':
-            download_video(video_url)
+        if media_format == 'audio':
+            download_audio(video_url, channel, bit_depth, format)
+        elif media_format == 'video':
+            download_video(video_url, resolution)
+        elif media_format == 'both':
+            download_video(video_url, resolution)
+            download_audio(video_url, channel, bit_depth, format)
         else:
-            print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
-    except RegexMatchError:
+            print("Invalid media format selection.")
+    except exceptions.RegexMatchError:
         print("Invalid YouTube video URL. Please enter a valid URL.")
 
 def main():
     create_database("video_metadata.db")
 
     while True:
-        video_url = input("Enter the YouTube video URL: ")
+        video_url = input("Enter the YouTube video URL (or type 'exit' to quit): ").strip()
+        if video_url.lower() == 'exit':
+            break
 
-        try:
-            YouTube(video_url)
-        except RegexMatchError:
-            print("Invalid YouTube video URL. Please enter a valid URL.")
-            continue
+        media_format = input("Download as Only Audio, Only Video, or Both (audio/video/both)?: ").strip().lower()
 
-        choice = input("Download as Audio or Video (A/V)?: ").lower()
+        if media_format in ['audio', 'both']:
+            channel = input("Select audio channel (Mono/Stereo): ").strip().lower()
+            bit_depth = input("Select bit depth (16-bit/24-bit): ").strip().lower()
+            format = input("Select file format (MP3/WAV): ").strip().lower()
+            handle_media_download(video_url, media_format, channel=channel, bit_depth=bit_depth, format=format)
 
-        if choice == 'a':
-            quality = input("Select audio quality (High/Low): ").lower()
-            handle_gui_interaction(video_url, choice, quality)
-        elif choice == 'v':
-            handle_gui_interaction(video_url, choice)
-        else:
-            print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
+        if media_format in ['video', 'both']:
+            resolution = input("Select video resolution (480p/720p/1080p): ").strip().lower()
+            handle_media_download(video_url, media_format, resolution=resolution)
 
-        another_download = input("Do you want to download another file? (yes/no): ").lower()
+        if media_format not in ['audio', 'video', 'both']:
+            print("Invalid choice. Please enter 'audio', 'video', or 'both'.")
+
+        another_download = input("Do you want to download another file? (yes/no): ").strip().lower()
         if another_download != 'yes':
             break
 
