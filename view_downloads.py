@@ -13,9 +13,9 @@ def display_details(title, metadata):
         detail_label.pack()
 
 def display_sections():
-    all_videos = fetch_all_videos("video_metadata.db")
-    videos = [video for video in all_videos if video[5] != "Audio"]
-    audio = fetch_all_audio("video_metadata.db")
+    all_videos = fetch_all_videos("link2playback.db") 
+    videos = [video for video in all_videos if video[6] != "Audio"]
+    audio = fetch_all_audio("link2playback.db")
 
     root = tk.Tk()
     root.title("Downloads")
@@ -28,7 +28,7 @@ def display_sections():
     video_label.pack()
     video_listbox = tk.Listbox(video_frame)
     for video in videos:
-        video_listbox.insert(tk.END, video[2])
+        video_listbox.insert(tk.END, video[2]) 
     video_listbox.pack(fill=tk.BOTH, expand=True)  
     video_scrollbar = tk.Scrollbar(video_frame, orient=tk.VERTICAL, command=video_listbox.yview)
     video_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -48,37 +48,33 @@ def display_sections():
 
     def on_select_video(event):
         if video_listbox.curselection():
-            index = video_listbox.curselection()[0]
+            index = video_listbox.curselection()[0]  
             selected_video = videos[index]
             video_metadata = {
                 "URL": selected_video[1],
                 "Author": selected_video[3],
                 "Duration": selected_video[4],
-                "Resolution": selected_video[5]
+                "Resolution": selected_video[5],
+                "Format": selected_video[6],
             }
             display_details(selected_video[2], video_metadata)
 
     def on_select_audio(event):
         if audio_listbox.curselection():
-            index = audio_listbox.curselection()[0]
+            index = audio_listbox.curselection()[0]  
             selected_audio = audio[index]
             audio_metadata = {
                 "URL": selected_audio[1],
                 "Author": selected_audio[3],
                 "Duration": selected_audio[4],
                 "Quality": selected_audio[5],
-                "Bitrate": selected_audio[6]
+                "Bitrate": selected_audio[6],
+                "Format": selected_audio[7],
             }
             display_details(selected_audio[2], audio_metadata)
 
     video_listbox.bind("<<ListboxSelect>>", on_select_video)
     audio_listbox.bind("<<ListboxSelect>>", on_select_audio)
-
-    root.mainloop()
-
-if __name__ == "__main__":
-    display_sections()
-
 
     root.mainloop()
 
