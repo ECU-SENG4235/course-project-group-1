@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, colorchooser, scrolledtext
-from mainwithbatch import download_video, download_audio, batch_download
+from main import download_video, download_audio, batch_download
 import subprocess
 from ttkbootstrap import Style
 

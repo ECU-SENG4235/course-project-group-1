@@ -4,3 +4,4 @@ coverage
 Pyinstaller
 moviepy
 ttkbootstrap
+pytest-cov
