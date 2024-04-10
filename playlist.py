@@ -2,6 +2,7 @@ import tkinter as tk
 from database import fetch_all_videos, fetch_all_audio
 import os
 import subprocess
+from ttkbootstrap import Style
 
 def list_files(folder):
     files = os.listdir(folder)
@@ -14,6 +15,29 @@ def open_file(event):
     filename = widget.get(index)
     filepath = os.path.join(folder, filename)
     subprocess.Popen(['xdg-open', filepath])  # Linux specific, opens file with default application
+
+def play_selected_file():
+    # Determine which listbox is active
+    if video_listbox.curselection():
+        open_file_video()
+    elif audio_listbox.curselection():
+        open_file_audio()
+
+def open_file_video():
+    if video_listbox.curselection():
+        index = video_listbox.curselection()[0]
+        folder = "video_downloads"
+        filename = video_listbox.get(index)
+        filepath = os.path.join(folder, filename)
+        subprocess.Popen(['xdg-open', filepath])  # Linux specific, opens file with default application
+
+def open_file_audio():
+    if audio_listbox.curselection():
+        index = audio_listbox.curselection()[0]
+        folder = "audio_downloads"
+        filename = audio_listbox.get(index)
+        filepath = os.path.join(folder, filename)
+        subprocess.Popen(['xdg-open', filepath])  # Linux specific, opens file with default application
 
 def display_sections():
     video_files = list_files("video_downloads")
@@ -118,6 +142,9 @@ def run_gui():
     # Set initial window size
     root.geometry("800x500")
 
+    # Apply ttkbootstrap style with a different theme
+    style = Style(theme='solar')
+
     # Frames
     global list_frame
     list_frame = tk.Frame(root)
@@ -151,6 +178,10 @@ def run_gui():
     # Button to refresh the lists
     refresh_button = tk.Button(root, text="Refresh", command=display_sections)
     refresh_button.pack(pady=10)
+
+    # Play button
+    play_button = tk.Button(root, text="Play", command=play_selected_file)
+    play_button.pack(pady=10)
 
     # Display initial file lists
     display_sections()
