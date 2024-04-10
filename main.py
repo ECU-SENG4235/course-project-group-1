@@ -2,47 +2,74 @@ import os
 from pytube import YouTube
 from pytube.cli import on_progress
 from pytube.exceptions import RegexMatchError
-from database import create_database, insert_video_metadata, insert_audio_metadata
+from moviepy.editor import VideoFileClip
 
-def download_video(video_url):
-    yt = YouTube(video_url, on_progress_callback=on_progress)
+# Function to download a video from a YouTube URL
+def download_video(video_url, video_format='mp4'):
+    try:
+        yt = YouTube(video_url, on_progress_callback=on_progress)
+    except RegexMatchError:
+        print("Invalid YouTube video URL. Skipping...")
+        return
+
     stream = yt.streams.get_highest_resolution()
-    stream.download(output_path="video_downloads")
+
+    if not stream:
+        print("No streams found for the video.")
+        return
+
+    video_file_path = stream.download(output_path="video_downloads")
     print(f"Downloaded video: {stream.title}")
 
-    video_metadata = (video_url, stream.title, yt.author, yt.length, stream.resolution)
-    insert_video_metadata("video_metadata.db", video_metadata)
-    print("Video metadata saved to the database.")
+    if stream.includes_audio_track and stream.mime_type != f'video/{video_format}':
+        converted_video_path = video_file_path.replace(".mp4", f".{video_format}")
+        video_clip = VideoFileClip(video_file_path)
+        codec = "libx264"
+        parameters = ['-preset', 'fast', '-crf', '23']
+        video_clip.write_videofile(converted_video_path, codec=codec, ffmpeg_params=parameters)
+        video_clip.close()
+        os.remove(video_file_path)
+        print(f"Converted video to {video_format.upper()}: {converted_video_path}")
+    else:
+        converted_video_path = video_file_path
 
-def download_audio(video_url, quality='high'):
-    yt = YouTube(video_url, on_progress_callback=on_progress)
+    # No database related code here
+
+# Function to download audio from a YouTube URL
+def download_audio(video_url, audio_format='mp3', quality='high'):
+    try:
+        yt = YouTube(video_url, on_progress_callback=on_progress)
+    except RegexMatchError:
+        print("Invalid YouTube video URL. Skipping...")
+        return
 
     if quality == 'high':
         stream = yt.streams.filter(only_audio=True, abr='128kbps').first()
-        quality_tag = 'high_q'
+        quality_tag = 'HQ'
     elif quality == 'low':
         stream = yt.streams.filter(only_audio=True).first()
-        quality_tag = 'low_q'
+        quality_tag = 'LQ'
     else:
-        print("Invalid audio quality choice. Downloading in high quality.")
-        stream = yt.streams.filter(only_audio=True).first()
-        quality_tag = 'high_q'
+        stream = yt.streams.filter(only_audio=True, abr='128kbps').first()
+        quality_tag = 'HQ'
 
     audio_file = stream.download(output_path="audio_downloads")
-    audio_file_mp3 = audio_file.replace(".mp4", f"_{quality_tag}.mp3")
+    filename, extension = os.path.splitext(audio_file)
+    renamed_audio_file = f"{filename}_{quality_tag}.{audio_format}"
+    os.rename(audio_file, renamed_audio_file)
+    print(f"Downloaded and converted audio to {quality_tag} {audio_format.upper()}: {renamed_audio_file}")
 
-    if os.path.exists(audio_file_mp3):
-        print(f"MP3 file already exists: {audio_file_mp3}")
-        os.remove(audio_file)
-    else:
-        os.rename(audio_file, audio_file_mp3)
-        print(f"Downloaded and converted audio to MP3: {audio_file_mp3}")
+    # No database related code here
 
-    audio_metadata = (video_url, yt.title, yt.author, yt.length, quality, stream.abr)
-    insert_audio_metadata("video_metadata.db", audio_metadata)
+# Function for batch downloading
+def batch_download(urls, download_type, format_choice, quality_choice=None):
+    for url in urls:
+        if download_type == 'a':
+            download_audio(url, format_choice, quality_choice)
+        elif download_type == 'v':
+            download_video(url, format_choice)
 
-    print("Audio metadata saved to the database.")
-
+# Function to handle GUI interaction
 def handle_gui_interaction(video_url, choice, quality='high'):
     try:
         if choice == 'a':
@@ -54,31 +81,43 @@ def handle_gui_interaction(video_url, choice, quality='high'):
     except RegexMatchError:
         print("Invalid YouTube video URL. Please enter a valid URL.")
 
+# Main function to manage the downloading process
 def main():
-    create_database("video_metadata.db")
+    batch_download_choice = input("Do you want to input multiple links for batch download? (yes/no): ").lower()
+    if batch_download_choice == 'yes':
+        urls = input("Enter the YouTube video URLs separated by a comma: ").split(',')
+        urls = [url.strip() for url in urls]
 
-    while True:
+        download_type = input("Download as Audio or Video (A/V)?: ").lower()
+        if download_type == 'a':
+            format_choice = input("Select audio format (MP3/MP4/WAV/OGG): ").lower()
+            quality_choice = input("Select audio quality (High/Low): ").lower()
+            batch_download(urls, download_type, format_choice, quality_choice)
+        elif download_type == 'v':
+            format_choice = input("Select video format (MP4/MOV/AVI/WMV/WEBM/FLV): ").lower()
+            batch_download(urls, download_type, format_choice)
+        else:
+            print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
+    else:
+        # Single download logic
         video_url = input("Enter the YouTube video URL: ")
-
         try:
-            YouTube(video_url)
+            YouTube(video_url)  # Validate the YouTube video URL
         except RegexMatchError:
             print("Invalid YouTube video URL. Please enter a valid URL.")
-            continue
+            return  # Return or you might use continue in a loop
 
         choice = input("Download as Audio or Video (A/V)?: ").lower()
 
         if choice == 'a':
+            audio_format = input("Select audio format (MP3/MP4/WAV/OGG): ").lower()
             quality = input("Select audio quality (High/Low): ").lower()
-            handle_gui_interaction(video_url, choice, quality)
+            download_audio(video_url, audio_format, quality)
         elif choice == 'v':
-            handle_gui_interaction(video_url, choice)
+            video_format = input("Select video format (MP4/MOV/AVI/WMV/WEBM/FLV): ").lower()
+            download_video(video_url, video_format)
         else:
             print("Invalid choice. Please enter 'A' for audio or 'V' for video.")
-
-        another_download = input("Do you want to download another file? (yes/no): ").lower()
-        if another_download != 'yes':
-            break
 
 if __name__ == "__main__":
     main()

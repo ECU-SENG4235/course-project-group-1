@@ -10,7 +10,7 @@ from main import handle_gui_interaction
 from guiPage2.build.gui import open_guiPage2
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\kenda\Documents\CourseProject4235\course-project-group-1\guiPage1\build\assets\frame0") 
+ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\kenda\Documents\course-project-group-1\guiPage1\build\assets\frame0") 
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
