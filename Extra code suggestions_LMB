@@ -1,0 +1,53 @@
+# This could be a possible extension to main script to remove audio from videos
+
+# Function to download video without audio
+def download_video_without_audio(video_url):
+    yt = YouTube(video_url, on_progress_callback=on_progress)
+    
+    # Filter streams to exclude those with audio tracks
+    video_streams = yt.streams.filter(only_video=True)
+    
+    # Check if there are any video-only streams
+    if video_streams:
+        # Select the first available video-only stream
+        stream = video_streams.first()
+        stream.download(output_path="video_downloads")
+        print(f"Downloaded video without audio: {stream.title}")
+
+        # Insert video metadata into the database
+        video_metadata = (video_url, stream.title, yt.author, yt.length, stream.resolution)
+        insert_video_metadata("video_metadata.db", video_metadata)
+        print("Video metadata saved to the database.")
+    else:
+        print("No video stream without audio found.")
+
+
+
+# This could be used to find the file size
+
+def get_file_size(file_path):
+    # Check if the file exists
+    if os.path.exists(file_path):
+        # Get the file size in bytes
+        file_size = os.path.getsize(file_path)
+        return file_size
+    else:
+        print("File does not exist.")
+        return None
+
+# By getting the file size we can use it to determine a download time, to which this script can caluctulate
+
+        
+        start_time = time.time()  # Record the start time
+        stream.download(output_path="video_downloads")
+        end_time = time.time()  # Record the end time
+        
+        download_time = end_time - start_time  # Calculate the elapsed time in seconds
+        download_speed = stream.filesize / download_time  # Calculate download speed in bytes per second
+        
+        # Calculate estimated download time for a 100 MB file (adjust as needed)
+        estimated_download_time = (100 * 1024 * 1024) / download_speed  # in seconds
+        
+        print(f"Downloaded video without audio: {stream.title}")
+        print(f"Estimated download time: {estimated_download_time:.2f} seconds")
+        print(f"Download speed: {download_speed:.2f} bytes/second")
