@@ -59,11 +59,13 @@ def toggle_download_mode():
     if mode_var.get() == "Single":
         url_entry.place(x=185.0, y=63.0, width=439.0, height=124.0)
         url_text.place_forget()
+        scrollbar.grid_remove()  # Remove the scrollbar
     else:
         url_entry.delete(0, 'end')  # Clear the text box
         url_text.delete('1.0', 'end')  # Clear the scrolled text
         url_text.place(x=185.0, y=63.0, width=439.0, height=124.0)
         url_entry.place_forget()
+        scrollbar.grid(row=2, column=3, rowspan=5, sticky='ns')  # Place the scrollbar
 
 canvas = Canvas(
     window,
@@ -109,8 +111,8 @@ url_entry = Entry(window, bd=0, bg="#F2F2F2", fg="black", highlightthickness=0)
 url_text = scrolledtext.ScrolledText(window, height=2, bg="#F2F2F2", fg="black")
 scrollbar = ttk.Scrollbar(window, orient="vertical", command=url_text.yview)
 url_text.config(yscrollcommand=scrollbar.set)
-scrollbar.place(x=621, y=63, height=124)
-toggle_download_mode()  # Initially set to single URL mode
+scrollbar.grid(row=2, column=3, rowspan=5, sticky='ns')  # Initially set to single URL mode
+toggle_download_mode()
 
 # Dropdowns for formats with custom styling
 video_format_menu = ttk.OptionMenu(window, video_format_var, 'mp4', 'mp4', 'mov', 'avi', 'wmv', 'webm', 'flv')
