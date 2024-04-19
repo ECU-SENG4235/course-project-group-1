@@ -170,7 +170,7 @@ def run_gui():
     root.iconbitmap(icon_path)  # Set the icon path here
     root.configure(bg="lightgray")  # Set background color of the root window
 
-    style = Style(theme='solar')
+    style = Style(theme='simplex')
     style.configure('TButton', background='#FF0000', foreground='white', font=('Nunito', 12, 'bold'))
     style.configure('TLabel', background='#D9D9D9', foreground='white', font=('Nunito', 12, 'bold'))
 
