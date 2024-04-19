@@ -22,7 +22,7 @@ class TestDatabaseFunctions(unittest.TestCase):
         # Connect to the database and check if the table exists
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
-        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='videos'")
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='video_metadata'")
         result = c.fetchone()
         self.assertIsNotNone(result)
 
@@ -33,7 +33,7 @@ class TestDatabaseFunctions(unittest.TestCase):
 
     def test_insert_and_fetch_videos(self):
         # Insert test data
-        video_metadata = ('http://example.com/video1', 'Video 1', 'Author 1', 120, '1080p')
+        video_metadata = ('http://example.com/video1', 'Video 1', 'Author 1', 120, '1080p', 'mp4')
         insert_video_metadata(self.db_path, video_metadata)
 
         # Fetch the inserted data
@@ -46,10 +46,14 @@ class TestDatabaseFunctions(unittest.TestCase):
         self.assertEqual(videos[0][3], 'Author 1')
         self.assertEqual(videos[0][4], 120)
         self.assertEqual(videos[0][5], '1080p')
+        self.assertEqual(videos[0][6], 'mp4')
+
+        # Check if downloaded_at is not None
+        self.assertIsNotNone(videos[0][7])
 
     def test_insert_and_fetch_audio(self):
         # Insert test data
-        audio_metadata = ('http://example.com/audio1', 'Audio 1', 'Author 1', 120, 'high', 128)
+        audio_metadata = ('http://example.com/audio1', 'Audio 1', 'Author 1', 120, 'high', 128, 'mp3')
         insert_audio_metadata(self.db_path, audio_metadata)
 
         # Fetch the inserted data
@@ -63,6 +67,10 @@ class TestDatabaseFunctions(unittest.TestCase):
         self.assertEqual(audio[0][4], 120)
         self.assertEqual(audio[0][5], 'high')
         self.assertEqual(audio[0][6], 128)
+        self.assertEqual(audio[0][7], 'mp3')
+
+        # Check if downloaded_at is not None
+        self.assertIsNotNone(audio[0][8])
 
 if __name__ == '__main__':
     unittest.main()
