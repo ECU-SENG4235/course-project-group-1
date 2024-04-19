@@ -72,6 +72,9 @@ def open_file_metadata():
     root.title("Link2Playback - Metadata")
     root.geometry("800x500")
 
+    icon_path = Path(__file__).parent / "frame0" / "icon.ico"
+    root.iconbitmap(icon_path)  # Set window icon
+
     video_frame = tk.Frame(root)
     video_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)
     video_label = tk.Label(video_frame, text="Videos", font=("Nunito", 14, "bold"))
@@ -129,6 +132,7 @@ def open_file_metadata():
     audio_listbox.bind("<<ListboxSelect>>", on_select_audio)
 
     root.mainloop()
+
 
 def open_file_list():
     # No changes needed in this function
