@@ -1,5 +1,4 @@
 # This code will possibly extract metadata from YouTube videos
-
 from pytube import YouTube
 import requests
 from io import BytesIO
@@ -11,17 +10,21 @@ def get_video_metadata(video_url):
         yt = YouTube(video_url)
 
         # Accessing metadata
-        print("Video Title:", yt.title)
-        print("Channel Name:", yt.author)
-        print("Video Duration:", yt.length, "seconds")
-        print("Video Views:", yt.views)
-        print("Video Description:", yt.description)
+        metadata = {
+            "Title": yt.title,
+            "Channel Name": yt.author,
+            "Duration (seconds)": yt.length,
+            "Views": yt.views,
+            "Description": yt.description,
+            "Thumbnail URL": yt.thumbnail_url
+        }
 
-        # Get thumbnail URL
-        thumbnail_url = yt.thumbnail_url
+        # Print metadata
+        for key, value in metadata.items():
+            print(f"{key}: {value}")
 
         # Download and display the thumbnail
-        response = requests.get(thumbnail_url)
+        response = requests.get(yt.thumbnail_url)
         img = Image.open(BytesIO(response.content))
         img.show()
 

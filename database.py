@@ -1,5 +1,8 @@
 import sqlite3
 
+def initialize_database(db_file):
+    create_database(db_file)
+
 def create_database(db_file):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
@@ -12,7 +15,6 @@ def create_database(db_file):
                  resolution TEXT,
                  format TEXT,
                  downloaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-    
     c.execute('''CREATE TABLE IF NOT EXISTS audio_metadata
                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
                 audio_url TEXT NOT NULL,
@@ -23,7 +25,6 @@ def create_database(db_file):
                 bitrate INTEGER, 
                 format TEXT,
                 downloaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-
     conn.commit()
     conn.close()
 
