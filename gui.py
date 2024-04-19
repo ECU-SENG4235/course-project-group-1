@@ -31,18 +31,27 @@ audio_format_var = StringVar(value='mp3')
 quality_var = StringVar(value='High')
 
 # Function to process the downloads
+def start_download():
+    status_indicator.config(bg="red")  # Turn indicator red to show download in progress
+    window.update()  # Update the window to immediately reflect the color change
+    download()  # Call the download function
+
+
 def download():
     mode = mode_var.get()
     choice = choice_var.get()
-    if mode == "Single":
-        video_url = url_entry.get()
-        if choice == 'A':
-            download_audio(video_url, audio_format_var.get(), quality_var.get())
-        elif choice == 'V':
-            download_video(video_url, video_format_var.get())
-    elif mode == "Batch":
-        video_urls_text = url_text.get("1.0", "end-1c")
-        process_batch_download(video_urls_text)
+    try:
+        if mode == "Single":
+            video_url = url_entry.get()
+            if choice == 'A':
+                download_audio(video_url, audio_format_var.get(), quality_var.get())
+            elif choice == 'V':
+                download_video(video_url, video_format_var.get())
+        elif mode == "Batch":
+            video_urls_text = url_text.get("1.0", "end-1c")
+            process_batch_download(video_urls_text)
+    finally:
+        end_download()  # Ensure the indicator turns green after download
 
 def process_batch_download(video_urls_text):
     video_urls = [url.strip() for url in video_urls_text.split(',') if url.strip()]
@@ -53,6 +62,9 @@ def process_batch_download(video_urls_text):
         batch_download(video_urls, 'a', audio_format_var.get(), quality_var.get())
     elif choice_var.get() == 'V':
         batch_download(video_urls, 'v', video_format_var.get())
+
+def end_download():
+    status_indicator.config(bg="green")  # Turn indicator green when download is done
 
 # Toggle between Single and Batch URL modes
 def toggle_download_mode():
@@ -65,7 +77,6 @@ def toggle_download_mode():
         url_text.delete('1.0', 'end')  # Clear the scrolled text
         url_text.place(x=185.0, y=63.0, width=439.0, height=124.0)
         url_entry.place_forget()
-        # Adjust scrollbar position to hide arrows
         scrollbar.grid(row=2, column=3, rowspan=5, sticky='ns', padx=(1000, 0))  
 
 canvas = Canvas(
@@ -93,7 +104,7 @@ playlist_button = Button(image=button_image_1, borderwidth=0, highlightthickness
 playlist_button.place(x=22.5, y=143.0, width=button_image_1.width(), height=button_image_1.height())
 
 button_image_2 = PhotoImage(file=relative_to_assets("button_2.png"))
-download_button = Button(image=button_image_2, borderwidth=0, highlightthickness=0, command=download, relief="flat")
+download_button = Button(image=button_image_2, borderwidth=0, highlightthickness=0, command=start_download, relief="flat")
 download_button.place(x=22.5, y=63.0, width=button_image_2.width(), height=button_image_2.height())
 
 # Radio buttons for mode and type selection with custom styling
@@ -136,6 +147,14 @@ low_quality_button = Radiobutton(window, text="Low", variable=quality_var, value
 low_quality_button.place(x=575.0, y=343.0, width=50.0, height=20.0)
 quality_label = ttk.Label(window, text="Select Audio Quality", background="#D8D8D8", font=bold_font)
 quality_label.place(x=435.5, y=330.0)
+
+# Status Indicator
+status_indicator = Canvas(window, width=20, height=20, bg='green', bd=0, highlightthickness=0, relief='ridge')
+status_indicator.place(x=20, y=377)  # Moved to the bottom-left corner
+
+# App Status Text
+app_status_label = ttk.Label(window, text="App Status", background="#D8D8D8", font=bold_font)
+app_status_label.place(x=50, y=377)  # Positioned to the right of the status indicator
 
 window.resizable(False, False)
 window.mainloop()
