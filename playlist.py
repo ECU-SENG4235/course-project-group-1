@@ -1,22 +1,46 @@
 import tkinter as tk
 import os
-from ttkbootstrap import Style
-from database import fetch_all_videos, fetch_all_audio, initialize_database
 from pathlib import Path
+from database import fetch_all_videos, fetch_all_audio, initialize_database
+from ttkbootstrap import Style
 
 def list_files(folder):
-    # Get the list of files and sort them alphabetically
     files = os.listdir(folder)
-    files.sort()  # Sort files alphabetically
     return files
+
+def search_files(keyword):
+    # Function to filter files based on the search keyword
+    filtered_videos = [file for file in list_files("video_downloads") if keyword.lower() in file.lower()]
+    filtered_audios = [file for file in list_files("audio_downloads") if keyword.lower() in file.lower()]
+    
+    video_listbox.delete(0, tk.END)
+    audio_listbox.delete(0, tk.END)
+    
+    for file in filtered_videos:
+        video_listbox.insert(tk.END, file)
+    for file in filtered_audios:
+        audio_listbox.insert(tk.END, file)
+
+def sort_files_alphabetically():
+    # Sort files alphabetically and refresh the display
+    display_sections()
+
 
 def open_file(event):
     widget = event.widget
     index = widget.curselection()[0]
-    folder = "video_downloads" if widget == video_listbox else "audio_downloads"
+    folder = "video_downloads" if widget == video_listbox else "audio_downloads"  # Choose folder based on widget
     filename = widget.get(index)
     filepath = os.path.join(folder, filename)
-    os.startfile(filepath)  # Open file with default application
+    print("Opening file:", filepath)  # Debugging statement
+    try:
+        os.startfile(filepath)  # Open file with default application
+    except FileNotFoundError:
+        print("Error: File not found:", filepath)
+        # Handle the error gracefully, such as displaying a message to the user
+
+
+
 
 def play_selected_file():
     if video_listbox.curselection():
@@ -52,22 +76,84 @@ def display_sections():
     for file in audio_files:
         audio_listbox.insert(tk.END, file)
 
-def search_files(keyword):
-    # Function to filter files based on the search keyword
-    filtered_videos = [file for file in list_files("video_downloads") if keyword.lower() in file.lower()]
-    filtered_audios = [file for file in list_files("audio_downloads") if keyword.lower() in file.lower()]
-    
-    video_listbox.delete(0, tk.END)
-    audio_listbox.delete(0, tk.END)
-    
-    for file in filtered_videos:
-        video_listbox.insert(tk.END, file)
-    for file in filtered_audios:
-        audio_listbox.insert(tk.END, file)
+def display_details(title, metadata):
+    popup = tk.Toplevel()
+    popup.title("Details")
+    details_label = tk.Label(popup, text=title, font=("Nunito", 14, "bold"))
+    details_label.pack()
 
-def sort_files_alphabetically():
-    # Sort files alphabetically and refresh the display
-    display_sections()
+    for key, value in metadata.items():
+        detail_text = f"{key}: {value}"
+        detail_label = tk.Label(popup, text=detail_text, font=("Nunito", 12))
+        detail_label.pack()
+
+def open_file_metadata():
+    all_videos = fetch_all_videos("link2playback.db") 
+    videos = [video for video in all_videos if video[6] != "Audio"]
+    audio = fetch_all_audio("link2playback.db")
+
+    root = tk.Tk()
+    root.title("Metadata")
+
+    root.geometry("736x414")
+
+    video_frame = tk.Frame(root)
+    video_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
+    video_label = tk.Label(video_frame, text="Videos", font=("Nunito", 14, "bold"))
+    video_label.pack()
+    global video_listbox  # declare as global to use in other functions
+    video_listbox = tk.Listbox(video_frame, font=("Nunito", 12))
+    for video in videos:
+        video_listbox.insert(tk.END, video[2]) 
+    video_listbox.pack(fill=tk.BOTH, expand=True)  
+    video_scrollbar = tk.Scrollbar(video_frame, orient=tk.VERTICAL, command=video_listbox.yview)
+    video_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    video_listbox.config(yscrollcommand=video_scrollbar.set)
+
+    audio_frame = tk.Frame(root)
+    audio_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
+    audio_label = tk.Label(audio_frame, text="Audio", font=("Nunito", 14, "bold"))
+    audio_label.pack()
+    global audio_listbox  # declare as global to use in other functions
+    audio_listbox = tk.Listbox(audio_frame, font=("Nunito", 12))
+    for audio_item in audio:
+        audio_listbox.insert(tk.END, audio_item[2])
+    audio_listbox.pack(fill=tk.BOTH, expand=True)
+    audio_scrollbar = tk.Scrollbar(audio_frame, orient=tk.VERTICAL, command=audio_listbox.yview)
+    audio_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    audio_listbox.config(yscrollcommand=audio_scrollbar.set)
+
+    def on_select_video(event):
+        if video_listbox.curselection():
+            index = video_listbox.curselection()[0]  
+            selected_video = videos[index]
+            video_metadata = {
+                "URL": selected_video[1],
+                "Author": selected_video[3],
+                "Duration (minutes)": selected_video[4]/60 ,
+                "Resolution": selected_video[5],
+                "Format": selected_video[6],
+            }
+            display_details(selected_video[2], video_metadata)
+
+    def on_select_audio(event):
+        if audio_listbox.curselection():
+            index = audio_listbox.curselection()[0]  
+            selected_audio = audio[index]
+            audio_metadata = {
+                "URL": selected_audio[1],
+                "Author": selected_audio[3],
+                "Duration (minutes)": selected_audio[4]/60,
+                "Quality": selected_audio[5],
+                "Bitrate": selected_audio[7],
+                "Format": selected_audio[6],
+            }
+            display_details(selected_audio[2], audio_metadata)
+
+    video_listbox.bind("<<ListboxSelect>>", on_select_video)
+    audio_listbox.bind("<<ListboxSelect>>", on_select_audio)
+
+    root.mainloop()
 
 def run_gui():
     db_file = "link2playback.db"
@@ -117,6 +203,10 @@ def run_gui():
     # Play button
     play_button = tk.Button(root, text="Play", command=play_selected_file, font=("Nunito", 12), bg="red", fg="white")
     play_button.pack(pady=10)
+
+    # Metadata button
+    metadata_button = tk.Button(root, text="Metadata", command=open_file_metadata, font=("Nunito", 12), bg="red", fg="white")
+    metadata_button.pack(pady=10)
 
     # Display initial file lists
     display_sections()
