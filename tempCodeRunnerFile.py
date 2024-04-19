@@ -136,6 +136,3 @@ low_quality_button = Radiobutton(window, text="Low", variable=quality_var, value
 low_quality_button.place(x=575.0, y=343.0, width=50.0, height=20.0)
 quality_label = ttk.Label(window, text="Select Audio Quality", background="#D8D8D8", font=bold_font)
 quality_label.place(x=435.5, y=330.0)
-
-window.resizable(False, False)
-window.mainloop()
