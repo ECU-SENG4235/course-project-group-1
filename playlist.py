@@ -68,7 +68,7 @@ def open_file_metadata():
     audio = fetch_all_audio("link2playback.db")
 
     root = tk.Tk()
-    root.title("Downloads")
+    root.title("Metadata")
 
     root.geometry("736x414")
 
@@ -160,9 +160,12 @@ def sort_files_alphabetically():
 
 def run_gui():
     root = tk.Tk()
-    root.title("Downloads in File Folders")
-    root.geometry("800x500")
-    style = Style(theme='solar')
+    root.title("Video                                                                                                Audio")
+    root.geometry("1000x400")
+    style = Style(theme='simplex')
+
+    # Make Buttons Larger
+    button_font = ("Nunito", 14)
 
     search_frame = tk.Frame(root, bg="lightgray")
     search_frame.pack(side=tk.TOP, fill=tk.X)
@@ -173,7 +176,7 @@ def run_gui():
     search_button = tk.Button(search_frame, text="Search", command=lambda: search_files(search_entry.get()), font=("Nunito", 12))
     search_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    sort_button = tk.Button(search_frame, text="Sort Alphabetically", command=sort_files_alphabetically, font=("Nunito", 12))
+    sort_button = tk.Button(search_frame, text="Sort Lists", command=sort_files_alphabetically, font=("Nunito", 12))
     sort_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
     refresh_button = tk.Button(search_frame, text="Refresh", command=display_sections, font=("Nunito", 12))
