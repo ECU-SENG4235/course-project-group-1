@@ -1,8 +1,9 @@
 import tkinter as tk
-from database import fetch_all_videos, fetch_all_audio
 import os
 import subprocess
 from ttkbootstrap import Style
+from tkinter import ttk
+from database import fetch_all_videos, fetch_all_audio
 
 def list_files(folder):
     files = os.listdir(folder)
@@ -54,12 +55,12 @@ def display_sections():
 def display_details(title, metadata):
     popup = tk.Toplevel()
     popup.title("Details")
-    details_label = tk.Label(popup, text=title)
+    details_label = tk.Label(popup, text=title, font=("Nunito", 14, "bold"))
     details_label.pack()
 
     for key, value in metadata.items():
         detail_text = f"{key}: {value}"
-        detail_label = tk.Label(popup, text=detail_text)
+        detail_label = tk.Label(popup, text=detail_text, font=("Nunito", 12))
         detail_label.pack()
 
 def open_file_metadata():
@@ -74,9 +75,9 @@ def open_file_metadata():
 
     video_frame = tk.Frame(root)
     video_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
-    video_label = tk.Label(video_frame, text="Videos")
+    video_label = tk.Label(video_frame, text="Videos", font=("Nunito", 14, "bold"))
     video_label.pack()
-    video_listbox = tk.Listbox(video_frame)
+    video_listbox = tk.Listbox(video_frame, font=("Nunito", 12))
     for video in videos:
         video_listbox.insert(tk.END, video[2]) 
     video_listbox.pack(fill=tk.BOTH, expand=True)  
@@ -86,9 +87,9 @@ def open_file_metadata():
 
     audio_frame = tk.Frame(root)
     audio_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
-    audio_label = tk.Label(audio_frame, text="Audio")
+    audio_label = tk.Label(audio_frame, text="Audio", font=("Nunito", 14, "bold"))
     audio_label.pack()
-    audio_listbox = tk.Listbox(audio_frame)
+    audio_listbox = tk.Listbox(audio_frame, font=("Nunito", 12))
     for audio_item in audio:
         audio_listbox.insert(tk.END, audio_item[2])
     audio_listbox.pack(fill=tk.BOTH, expand=True)
@@ -134,23 +135,59 @@ def open_file_list():
     list_frame.pack(fill=tk.BOTH, expand=True)
     display_sections()
 
+def search_files(keyword):
+    video_files = list_files("video_downloads")
+    audio_files = list_files("audio_downloads")
+
+    video_listbox.delete(0, tk.END)
+    audio_listbox.delete(0, tk.END)
+
+    for file in video_files:
+        if keyword.lower() in file.lower():
+            video_listbox.insert(tk.END, file)
+    for file in audio_files:
+        if keyword.lower() in file.lower():
+            audio_listbox.insert(tk.END, file)
+
+def sort_files_alphabetically():
+    video_listbox.delete(0, tk.END)
+    audio_listbox.delete(0, tk.END)
+    video_files = sorted(list_files("video_downloads"))
+    audio_files = sorted(list_files("audio_downloads"))
+    for file in video_files:
+        video_listbox.insert(tk.END, file)
+    for file in audio_files:
+        audio_listbox.insert(tk.END, file)
+
 def run_gui():
-    # Initialize the main window
     root = tk.Tk()
     root.title("Downloads in File Folders")
-
-    # Set initial window size
     root.geometry("800x500")
+    root.configure(bg="lightgray")  # Set background color of the root window
 
-    # Apply ttkbootstrap style with a different theme
     style = Style(theme='solar')
+    style.configure('TButton', background='#FF0000', foreground='white', font=('Nunito', 12, 'bold'))
+    style.configure('TLabel', background='#D9D9D9', foreground='white', font=('Nunito', 12, 'bold'))
+
+    search_frame = tk.Frame(root, bg="lightgray")
+    search_frame.pack(side=tk.TOP, fill=tk.X)
+
+    search_entry = tk.Entry(search_frame, width=50, font=("Nunito", 12))
+    search_entry.pack(side=tk.LEFT, padx=10, pady=5)
+
+    search_button = tk.Button(search_frame, text="Search", command=lambda: search_files(search_entry.get()), font=("Nunito", 12))
+    search_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+    sort_button = tk.Button(search_frame, text="Sort Alphabetically", command=sort_files_alphabetically, font=("Nunito", 12))
+    sort_button.pack(side=tk.RIGHT, padx=5, pady=5)
+
+    refresh_button = tk.Button(search_frame, text="Refresh", command=display_sections, font=("Nunito", 12))
+    refresh_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
     # Frames
-    global list_frame
     list_frame = tk.Frame(root)
     list_frame.pack(fill=tk.BOTH, expand=True)
 
-    global metadata_frame
     metadata_frame = tk.Frame(root)
     metadata_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -158,36 +195,29 @@ def run_gui():
     nav_bar = tk.Frame(root, bg="lightgray")
     nav_bar.pack(side=tk.TOP, fill=tk.X)
 
-    #list_button = tk.Button(nav_bar, text="File List", command=open_file_list)
-    #list_button.pack(side=tk.LEFT, padx=10, pady=5)
-    metadata_button = tk.Button(nav_bar, text="Metadata", command=open_file_metadata)
+    metadata_button = tk.Button(nav_bar, text="Metadata", command=open_file_metadata, font=("Nunito", 12))
     metadata_button.pack(side=tk.LEFT, padx=10, pady=5)
 
     # Video files section
     global video_listbox
-    video_listbox = tk.Listbox(list_frame, selectmode=tk.SINGLE, font=("Helvetica", 12))
+    video_listbox = tk.Listbox(list_frame, selectmode=tk.SINGLE, font=("Nunito", 12))
     video_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     video_listbox.bind("<Double-Button-1>", open_file)
 
     # Audio files section
     global audio_listbox
-    audio_listbox = tk.Listbox(list_frame, selectmode=tk.SINGLE, font=("Helvetica", 12))
+    audio_listbox = tk.Listbox(list_frame, selectmode=tk.SINGLE, font=("Nunito", 12))
     audio_listbox.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
     audio_listbox.bind("<Double-Button-1>", open_file)
 
-    # Button to refresh the lists
-    refresh_button = tk.Button(root, text="Refresh", command=display_sections)
-    refresh_button.pack(pady=10)
-
     # Play button
-    play_button = tk.Button(root, text="Play", command=play_selected_file)
+    play_button = tk.Button(root, text="Play", command=play_selected_file, font=("Nunito", 12))
     play_button.pack(pady=10)
 
     # Display initial file lists
     display_sections()
 
     # Metadata display
-    #metadata_button = tk.Button(metadata_frame, text="Back to File List", command=open_file_list)
     metadata_button.pack(side=tk.TOP, padx=10, pady=5)
 
     # Run the application

@@ -1,4 +1,4 @@
-from tkinter import Tk, Canvas, Entry, Button, PhotoImage, Radiobutton, ttk, scrolledtext, messagebox  # Import messagebox module
+from tkinter import Tk, Canvas, Entry, Button, PhotoImage, Radiobutton, ttk, scrolledtext, messagebox
 from tkinter import StringVar
 from tkinter.font import Font
 from pathlib import Path
@@ -65,7 +65,8 @@ def toggle_download_mode():
         url_text.delete('1.0', 'end')  # Clear the scrolled text
         url_text.place(x=185.0, y=63.0, width=439.0, height=124.0)
         url_entry.place_forget()
-        scrollbar.grid(row=2, column=3, rowspan=5, sticky='ns')  # Place the scrollbar
+        # Adjust scrollbar position to hide arrows
+        scrollbar.grid(row=2, column=3, rowspan=5, sticky='ns', padx=(1000, 0))  
 
 canvas = Canvas(
     window,
@@ -109,6 +110,7 @@ audio_mode_button.place(x=435.5, y=230.0, width=100.0, height=20.0)
 # Entry for Single URL and Text for Batch URLs
 url_entry = Entry(window, bd=0, bg="#F2F2F2", fg="black", highlightthickness=0)
 url_text = scrolledtext.ScrolledText(window, height=2, bg="#F2F2F2", fg="black")
+url_text.place(x=185.0, y=63.0, width=439.0, height=124.0)  # Placed before scrollbar
 scrollbar = ttk.Scrollbar(window, orient="vertical", command=url_text.yview)
 url_text.config(yscrollcommand=scrollbar.set)
 scrollbar.grid(row=2, column=3, rowspan=5, sticky='ns')  # Initially set to single URL mode
