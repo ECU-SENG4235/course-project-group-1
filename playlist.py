@@ -70,62 +70,62 @@ def open_file_metadata():
     audio = fetch_all_audio("link2playback.db")
 
     root = tk.Tk()
-    root.title("Link2Playback - Playlist")
-    icon_path = Path(__file__).parent / "frame0" / "icon.ico"
-    root.iconbitmap(icon_path)  # Set the icon path here
+    root.title("Link2Playback - Metadata")
 
-    root.geometry("736x414")
+    root.geometry("800x500")
 
     video_frame = tk.Frame(root)
-    video_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
-    video_label = tk.Label(video_frame, text="Videos", font=("Nunito", 14, "bold"), bg="gray", fg="white")
+    video_frame.pack(side=tk.LEFT, padx=10, pady=10, fill=tk.BOTH, expand=True)
+    video_label = tk.Label(video_frame, text="Videos", font=("Nunito", 14, "bold"))
     video_label.pack()
-    video_listbox = tk.Listbox(video_frame, font=("Nunito", 12), bg="gray", fg="white")
-    for video in videos:
-        video_listbox.insert(tk.END, video[2]) 
-    video_listbox.pack(fill=tk.BOTH, expand=True)  
-    video_scrollbar = tk.Scrollbar(video_frame, orient=tk.VERTICAL, command=video_listbox.yview, bg="gray", troughcolor="gray", activebackground="gray", highlightbackground="gray")
+    global video_listbox
+    video_listbox = tk.Listbox(video_frame, font=("Nunito", 12))
+    video_listbox.pack(fill=tk.BOTH, expand=True)
+    video_scrollbar = tk.Scrollbar(video_frame, orient=tk.VERTICAL, command=video_listbox.yview)
     video_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     video_listbox.config(yscrollcommand=video_scrollbar.set)
 
+    for video in videos:
+        video_listbox.insert(tk.END, video[2])
+
     audio_frame = tk.Frame(root)
-    audio_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)  # Adjust to fill both directions
-    audio_label = tk.Label(audio_frame, text="Audio", font=("Nunito", 14, "bold"), bg="gray", fg="white")
+    audio_frame.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.BOTH, expand=True)
+    audio_label = tk.Label(audio_frame, text="Audio", font=("Nunito", 14, "bold"))
     audio_label.pack()
-    audio_listbox = tk.Listbox(audio_frame, font=("Nunito", 12), bg="gray", fg="white")
-    for audio_item in audio:
-        audio_listbox.insert(tk.END, audio_item[2])
+    global audio_listbox
+    audio_listbox = tk.Listbox(audio_frame, font=("Nunito", 12))
     audio_listbox.pack(fill=tk.BOTH, expand=True)
-    audio_scrollbar = tk.Scrollbar(audio_frame, orient=tk.VERTICAL, command=audio_listbox.yview, bg="gray", troughcolor="gray", activebackground="gray", highlightbackground="gray")
+    audio_scrollbar = tk.Scrollbar(audio_frame, orient=tk.VERTICAL, command=audio_listbox.yview)
     audio_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     audio_listbox.config(yscrollcommand=audio_scrollbar.set)
 
+    for audio_item in audio:
+        audio_listbox.insert(tk.END, audio_item[2])
+
     def on_select_video(event):
-        if video_listbox.curselection():
-            index = video_listbox.curselection()[0]  
-            selected_video = videos[index]
-            video_metadata = {
-                "URL": selected_video[1],
-                "Author": selected_video[3],
-                "Duration (minutes)": selected_video[4]/60 ,
-                "Resolution": selected_video[5],
-                "Format": selected_video[6],
-            }
-            display_details(selected_video[2], video_metadata)
+        index = video_listbox.curselection()[0]
+        selected_video = videos[index]
+        video_metadata = {
+            "URL": selected_video[1],
+            "Author": selected_video[3],
+            "Duration (minutes)": selected_video[4] / 60,
+            "Resolution": selected_video[5],
+            "Format": selected_video[6],
+        }
+        display_details(selected_video[2], video_metadata)
 
     def on_select_audio(event):
-        if audio_listbox.curselection():
-            index = audio_listbox.curselection()[0]  
-            selected_audio = audio[index]
-            audio_metadata = {
-                "URL": selected_audio[1],
-                "Author": selected_audio[3],
-                "Duration (minutes)": selected_audio[4]/60,
-                "Quality": selected_audio[5],
-                "Bitrate": selected_audio[7],
-                "Format": selected_audio[6],
-            }
-            display_details(selected_audio[2], audio_metadata)
+        index = audio_listbox.curselection()[0]
+        selected_audio = audio[index]
+        audio_metadata = {
+            "URL": selected_audio[1],
+            "Author": selected_audio[3],
+            "Duration (minutes)": selected_audio[4] / 60,
+            "Quality": selected_audio[5],
+            "Bitrate": selected_audio[7],
+            "Format": selected_audio[6],
+        }
+        display_details(selected_audio[2], audio_metadata)
 
     video_listbox.bind("<<ListboxSelect>>", on_select_video)
     audio_listbox.bind("<<ListboxSelect>>", on_select_audio)
@@ -170,7 +170,7 @@ def run_gui():
     root.iconbitmap(icon_path)  # Set the icon path here
     root.configure(bg="lightgray")  # Set background color of the root window
 
-    style = Style(theme='solar')
+    style = Style(theme='simplex')
     style.configure('TButton', background='#FF0000', foreground='white', font=('Nunito', 12, 'bold'))
     style.configure('TLabel', background='#D9D9D9', foreground='white', font=('Nunito', 12, 'bold'))
 
