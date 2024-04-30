@@ -20,17 +20,28 @@
 
 ```mermaid
 flowchart TD;
-    A[Start] --> B[Initialize Rich Console]
-    B --> C[Main Menu]
-    C --> D{Option Selected}
-    D -->|How to Use| E[Display Instructions]
-    D -->|Get Metrics| F[Analyze Neighboring Files]
-    D -->|Generate Summary Report| G[Generate and Display Summary]
-    D -->|Exit| H[Exit Program]
-    E --> I[Wait and Clear Screen] --> C
-    F --> I
-    G --> I
-    H --> J[End]
+    A[Start] --> B[Input YouTube video URL]
+    B --> C{Choice: A/V?}
+    C -->|A for Audio| D([Input audio quality])
+    C -->|V for Video| E([Download video])
+    D --> F{Quality: High/Low?}
+    F -->|High| G([Download audio -High quality])
+    F -->|Low| H([Download audio -Low quality])
+    G --> J[Play audio]
+    H --> J
+    E --> I([Download completed])
+    I --> K{Playback option?}
+    K -->|Internal player| L([Play video/audio internally])
+    K -->|External player| M([Open video/audio with external player])
+    K -->|No playback| N[End]
+    J --> O{Adjust playback settings?}
+    O -->|Yes| P([Open playback settings])
+    O -->|No| N
+    P --> Q([Adjust settings])
+    Q --> O
+    B -->|Invalid URL| N([End])
+    L --> N
+    M --> N
 
 ```
 
